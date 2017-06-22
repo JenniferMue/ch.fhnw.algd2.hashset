@@ -24,7 +24,7 @@ public class MyHashSet<E> implements Set<E> {
       // bitshift --> from 1 to 2, 2 to 4, 4 to 8 and 8 to 16
       capacity <<= 1;
     }
-    table = new Object[minCapacity];
+    table = new Object[capacity];
   }
 
   public int startIndex(Object o) {
@@ -39,12 +39,20 @@ public class MyHashSet<E> implements Set<E> {
   }
 
   public int index(Object o) {
-    int index = startIndex(o);
     int step = step(o);
-    while (table[index] != null) {
+    int index = startIndex(o);
+    int counter = 0;
+    while (table[index] != null && !table[index].equals(o)  && counter != table.length) {
       index = index + step & (table.length - 1);
+      ++counter;
     }
-    return index;
+    return counter == table.length || table[index] == null ?  -1 : index;
+//
+//    if (counter == table.length) {
+//      return -1;
+//    } else {
+//      return index;
+//    }
   }
 
   @Override
@@ -61,7 +69,7 @@ public class MyHashSet<E> implements Set<E> {
       ++counter;
     }
     return o.equals(table[index]);
-  } 
+  }
 
   @Override
   public Iterator<E> iterator() {
@@ -158,8 +166,14 @@ public class MyHashSet<E> implements Set<E> {
   public boolean remove(Object o) {
     if (o == null)
       throw new NullPointerException("Null not allowed");
-    // TODO: Aufgabe 4
-    return false;
+
+    int index = index(o);
+    if (index == -1) {
+      return false;
+    }
+    table[index] = SENTINEL;
+    --size;
+    return true;
   }
 
   @Override
